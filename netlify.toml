@@ -1,0 +1,10 @@
+# Static site: a single self-contained HTML page with no dependencies or build step.
+[build]
+  publish = "."
+  command = ""
+
+# The repo has no index.html, so serve the Daily Vault page at the site root.
+[[redirects]]
+  from = "/"
+  to = "/daily-vault.html"
+  status = 200
