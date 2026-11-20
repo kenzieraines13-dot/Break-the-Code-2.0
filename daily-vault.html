@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BREAK THE CODE | Daily Vault</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #101522; --panel: #1b2435; --panel2: #252f43;
+  --gold: #f3c76a; --white: #f6f7fb; --muted: #a6afc0;
+  --green: #65d6a0; --red: #fa7777;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh;
+  background: radial-gradient(circle at top, #27334b, var(--bg) 65%);
+  color: var(--white); font-family: Arial, sans-serif;
+  display: flex; justify-content: center; padding: 25px 15px;
+}
+.container { width: 100%; max-width: 570px; }
+header { text-align: center; margin: 20px 0 30px; }
+.logo { color: var(--gold); font-size: 13px; letter-spacing: 5px; font-weight: bold; }
+h1 { font-size: clamp(36px, 9vw, 55px); margin: 12px 0 5px; letter-spacing: 2px; }
+.subtitle { color: var(--muted); font-size: 13px; letter-spacing: 2px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+.stat { background: var(--panel); padding: 14px 5px; border-radius: 12px; text-align: center; }
+.stat strong { display: block; color: var(--gold); font-size: 23px; }
+.stat span { color: var(--muted); font-size: 10px; letter-spacing: 1px; }
+.card {
+  background: var(--panel); border: 1px solid #354159; border-radius: 18px;
+  padding: 22px; margin-bottom: 15px; box-shadow: 0 15px 40px #0003;
+}
+.section-title { color: var(--gold); font-size: 13px; letter-spacing: 2px; margin-bottom: 15px; font-weight: bold; }
+.intro { color: var(--muted); line-height: 1.6; font-size: 14px; }
+.clue { display: flex; align-items: center; gap: 15px; background: var(--panel2); padding: 13px; border-radius: 10px; margin-bottom: 9px; }
+.number { color: var(--gold); font-size: 25px; font-weight: bold; letter-spacing: 4px; min-width: 90px; }
+.clue-text { font-size: 13px; line-height: 1.4; color: #dce2ec; }
+label { display: block; color: var(--muted); font-size: 12px; letter-spacing: 1px; }
+input {
+  width: 100%; background: #111827; border: 1px solid #45516a; border-radius: 12px;
+  color: var(--gold); font-size: 38px; text-align: center; letter-spacing: 15px;
+  padding: 15px; outline: none; margin: 12px 0;
+}
+input:focus { border-color: var(--gold); }
+button {
+  width: 100%; border: none; border-radius: 10px; padding: 15px; font-size: 13px;
+  font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: .2s;
+}
+button:hover { transform: translateY(-2px); }
+.primary { background: var(--gold); color: #171c28; }
+.secondary { background: var(--panel2); color: var(--white); border: 1px solid #45516a; margin-top: 10px; }
+button:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.message { padding: 15px; margin-top: 14px; border-radius: 10px; display: none; line-height: 1.5; font-size: 14px; }
+.message.success { display: block; background: #173b31; border: 1px solid var(--green); color: var(--green); }
+.message.error { display: block; background: #40252b; border: 1px solid var(--red); color: #ffb2b2; }
+.hint-box { display: none; background: #302c21; color: #f3dca8; padding: 15px; border-radius: 10px; margin-top: 12px; font-size: 13px; line-height: 1.5; }
+.footer { text-align: center; color: var(--muted); font-size: 11px; margin: 25px 0; letter-spacing: 1px; }
+@media (max-width: 400px) {
+  .card { padding: 17px; }
+  .number { font-size: 21px; min-width: 78px; }
+  .clue-text { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="logo">THE DAILY PUZZLE CLUB</div>
+  <h1>BREAK THE<br>CODE.</h1>
+  <div class="subtitle">ONE VAULT. A FEW CLUES. CAN YOU CRACK IT?</div>
+</header>
+
+<div class="stats">
+  <div class="stat"><strong id="attempts">0</strong><span>ATTEMPTS</span></div>
+  <div class="stat"><strong id="points">0</strong><span>POINTS</span></div>
+  <div class="stat"><strong id="streak">0</strong><span>DAY STREAK</span></div>
+</div>
+
+<div class="card">
+  <div class="section-title">🔐 TODAY’S MISSION</div>
+  <h2>THE DAILY VAULT</h2>
+  <p class="intro">A mysterious vault has been locked. Uncover its three-digit combination using the clues below. Every clue is exact.</p>
+  <p class="intro">All digits are different. Position matters. A new vault appears every day.</p>
+</div>
+
+<div class="card">
+  <div class="section-title">📁 CLASSIFIED EVIDENCE</div>
+  <div id="clues"></div>
+</div>
+
+<div class="card">
+  <div class="section-title">🔓 ENTER YOUR CODE</div>
+  <label for="guess">Three-digit combination</label>
+  <input id="guess" type="text" inputmode="numeric" maxlength="3" placeholder="000" autocomplete="off">
+  <button class="primary" id="submit">UNLOCK THE VAULT</button>
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
+  <button class="secondary" id="hintButton">💡 REVEAL A HINT (−20 POINTS)</button>
+  <div id="hint" class="hint-box"></div>
+
+  <button class="secondary" id="clearButton">CLEAR INPUT</button>
+</div>
+
+<div class="footer">
+  THINK SMART. STAY CURIOUS. BREAK THE CODE.<br><br>NEW CHALLENGE EVERY DAY.
+</div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const dateKey = d => d.toLocaleDateString("en-CA");
+const NOW = new Date();
+const TODAY = dateKey(NOW);
+const YESTERDAY = dateKey(new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - 1));
+
+/* ---------- Daily puzzle generator (same puzzle for everyone on a given date) ---------- */
+function seededRng(str) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function score(guess, code) {
+  let right = 0, common = 0;
+  for (let i = 0; i < 3; i++) {
+    if (guess[i] === code[i]) right++;
+    if (code.includes(guess[i])) common++;
+  }
+  return [right, common - right];
+}
+
+function randomTriple(rng) {
+  const d = [..."0123456789"];
+  for (let i = d.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [d[i], d[j]] = [d[j], d[i]];
+  }
+  return d.slice(0, 3).join("");
+}
+
+function buildPuzzle(seed) {
+  const rng = seededRng(seed);
+  const answer = randomTriple(rng);
+  let candidates = [];
+  for (let n = 0; n < 1000; n++) {
+    const s = String(n).padStart(3, "0");
+    if (new Set(s).size === 3) candidates.push(s);
+  }
+  const clues = [];
+  while (candidates.length > 1 && clues.length < 10) {
+    let best = null;
+    for (let t = 0; t < 40; t++) {
+      const g = randomTriple(rng);
+      if (g === answer || clues.some(c => c.guess === g)) continue;
+      const s = score(g, answer);
+      const rem = candidates.filter(c => {
+        const x = score(g, c);
+        return x[0] === s[0] && x[1] === s[1];
+      });
+      if (rem.length < candidates.length && (!best || rem.length < best.rem.length)) {
+        best = { guess: g, right: s[0], wrong: s[1], rem };
+      }
+    }
+    if (!best) break;
+    clues.push({ guess: best.guess, right: best.right, wrong: best.wrong });
+    candidates = best.rem;
+  }
+  return { answer, clues, candidates };
+}
+
+function clueText(c) {
+  if (!c.right && !c.wrong) return "None of these digits are in the code.";
+  const W = ["", "One", "Two", "Three"];
+  const parts = [];
+  if (c.right) parts.push(W[c.right] + " digit" + (c.right > 1 ? "s" : "") + " correct and in the right position");
+  if (c.wrong) parts.push(W[c.wrong] + " digit" + (c.wrong > 1 ? "s" : "") + " correct but in the wrong position");
+  return parts.join("; ") + ".";
+}
+
+const puzzle = buildPuzzle(TODAY);
+
+/* ---------- Saved stats ---------- */
+let S = {};
+try { S = JSON.parse(localStorage.getItem("btc_stats") || "{}") || {}; } catch (e) { S = {}; }
+
+if (S.date !== TODAY) {
+  S.date = TODAY; S.attempts = 0; S.solved = false; S.hint = false;
+}
+if (S.lastDate && S.lastDate !== TODAY && S.lastDate !== YESTERDAY) S.streak = 0;
+S.attempts = S.attempts || 0;
+S.points = S.points || 0;
+S.streak = S.streak || 0;
+
+function save() {
+  try { localStorage.setItem("btc_stats", JSON.stringify(S)); } catch (e) {}
+}
+
+function render() {
+  $("attempts").textContent = S.attempts;
+  $("points").textContent = S.points;
+  $("streak").textContent = S.streak;
+}
+
+function showMessage(text, success) {
+  const m = $("message");
+  m.textContent = text;
+  m.className = "message " + (success ? "success" : "error");
+}
+
+function lock() {
+  $("guess").disabled = true;
+  $("submit").disabled = true;
+}
+
+function showHint() {
+  $("hint").textContent = "The code contains the digit " + puzzle.answer[1] + ".";
+  $("hint").style.display = "block";
+  $("hintButton").disabled = true;
+}
+
+/* ---------- Game ---------- */
+function checkCode() {
+  if (S.solved) return;
+  const guess = $("guess").value;
+
+  if (!/^\d{3}$/.test(guess)) return showMessage("Enter exactly three digits.", false);
+  if (new Set(guess).size !== 3) return showMessage("All three digits must be different.", false);
+
+  S.attempts++;
+
+  if (puzzle.candidates.includes(guess)) {
+    S.solved = true;
+    S.points += Math.max(10, 100 - (S.attempts - 1) * 10 - (S.hint ? 20 : 0));
+    S.streak = S.lastDate === YESTERDAY ? S.streak + 1 : 1;
+    S.lastDate = TODAY;
+    showMessage("🎉 VAULT UNLOCKED! You cracked the code in " + S.attempts + " attempt(s)!", true);
+    lock();
+  } else {
+    showMessage("❌ Incorrect combination. Re-examine the evidence and try again!", false);
+  }
+  render();
+  save();
+}
+
+$("clues").innerHTML = puzzle.clues.map(c =>
+  '<div class="clue"><div class="number">' + c.guess + '</div><div class="clue-text">' + clueText(c) + "</div></div>"
+).join("");
+
+$("guess").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/\D/g, "");
+});
+$("guess").addEventListener("keydown", e => { if (e.key === "Enter") checkCode(); });
+$("submit").addEventListener("click", checkCode);
+$("hintButton").addEventListener("click", () => { S.hint = true; showHint(); save(); });
+$("clearButton").addEventListener("click", () => {
+  $("guess").value = "";
+  const m = $("message");
+  m.className = "message";
+  m.textContent = "";
+  $("guess").focus();
+});
+
+render();
+if (S.hint) showHint();
+if (S.solved) {
+  lock();
+  showMessage("🏆 THE VAULT IS ALREADY UNLOCKED! Come back tomorrow.", true);
+}
+</script>
+</body>
+</html>
